@@ -95,4 +95,25 @@
 
      iperf Done.
      ```
-     
+     - В конфигурационных файлах сервера и клиента /etc/openvpn/server.conf директива dev устанавливается в tun. И далее, аналогично предыдущему пункту, осуществляются замеры скорости в туннеле при использовании режима TUN:
+     ```shell
+     iperf3 -c 10.10.10.1 -t 40 -i 5
+     Connecting to host 10.10.10.1, port 5201
+     [  5] local 10.10.10.2 port 57688 connected to 10.10.10.1 port 5201
+     [ ID] Interval           Transfer     Bitrate         Retr  Cwnd
+     [  5]   0.00-5.00   sec   119 MBytes   199 Mbits/sec   38    237 KBytes       
+     [  5]   5.00-10.00  sec   117 MBytes   196 Mbits/sec   25    207 KBytes       
+     [  5]  10.00-15.00  sec   115 MBytes   193 Mbits/sec   21    149 KBytes       
+     [  5]  15.00-20.00  sec   115 MBytes   193 Mbits/sec   23    221 KBytes       
+     [  5]  20.00-25.00  sec   114 MBytes   192 Mbits/sec   29    145 KBytes       
+     [  5]  25.00-30.00  sec   114 MBytes   191 Mbits/sec   23    211 KBytes       
+     [  5]  30.00-35.00  sec   114 MBytes   192 Mbits/sec   28    145 KBytes       
+     [  5]  35.00-40.00  sec   113 MBytes   190 Mbits/sec   26    192 KBytes       
+     - - - - - - - - - - - - - - - - - - - - - - - - -
+     [ ID] Interval           Transfer     Bitrate         Retr
+     [  5]   0.00-40.00  sec   921 MBytes   193 Mbits/sec  213             sender
+     [  5]   0.00-40.18  sec   921 MBytes   192 Mbits/sec                  receiver
+
+     iperf Done.
+     ```
+     - Результаты замеров скорости в туннелях с использованием режимов TAP и TUN оказались практически одинаковыми. Стоит отметить, что в режиме TAP 
