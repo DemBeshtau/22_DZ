@@ -123,7 +123,7 @@
    apt update
    apt install -y openvpn easy-rsa
    ```
-   - Инициализация PKI: генерирование необходимых ключей и сертификатов:
+   - Инициализация PKI:
    ```shell
    cd /etc/openvpn
    /usr/share/easy-rsa/easyrsa init pki
