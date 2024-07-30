@@ -123,7 +123,86 @@
    apt update
    apt install -y openvpn easy-rsa
    ```
-   - Инициализация PKI, генерирование необходимых ключей и сертификатов:
+   - Инициализация PKI: генерирование необходимых ключей и сертификатов:
    ```shell
-   
+   cd /etc/openvpn
+   /usr/share/easy-rsa/easyrsa init pki
+   ```
+   - Генерирование необходимых серитификатов и ключей для сервера:
+   ```shell
+   echo 'rasvpn' | /usr/share/easy-rsa/easyrsa build-ca nopass
+   echo 'rasvpn' | /usr/share/easy-rsa/easyrsa gen-req server nopass
+   echo 'yes' | /usr/share/easy-rsa/easyrsa sign-req server server
+   /usr/share/easy-rsa/easyrsa gen-dh
+   openvpn --genkey --secret ta.key
+   ```
+   - Генерирование сертификатов для клиента:
+   ```shell
+   echo 'client' | /usr/share/easy-rsa/easyrsa gen-req client nopass
+   echo 'yes' | /usr/share/easy-rsa/easyrsa sign-req client client
+   ```
+   - Подготовка на сервере конфигурационного файла сервиса OpenVPN:
+   ```shell
+   nano /etc/openvpn/server.conf
+   ...
+   cat /etc/openvpn/server.conf
+   port 1207
+   proto udp
+   dev tun
+   ca /etc/openvpn/pki/ca.crt
+   cert /etc/openvpn/pki/issued/server.crt
+   key /etc/openvpn/pki/private/server.key
+   dh /etc/openvpn/pki/dh.pem
+   server 10.10.10.0 255.255.255.0
+   push "route 192.168.56.0 255.255.255.0"
+   ifconfig-pool-persist ipp.txt
+   client-to-client
+   client-config-dir /etc/openvpn/client
+   keepalive 10 120
+   comp-lzo
+   persist-key
+   persist-tun
+   status /var/log/openvpn-status.log
+   log /var/log/openvpn.log
+   verb 3
+   ```
+   - Задание параметра iroute для клиента:
+   ```shell
+   echo 'iroute 192.168.56.0 255.255.255.0' > /etc/openvpn/client/client
+   ```
+   - Копирование указанных ниже файлов сертификатов и ключа на клентскую машину:
+   ```shell
+   /etc/openvpn/pki/ca.crt
+   /etc/openvpn/pki/issued/client.crt
+   /etc/openvpn/pki/private/client.key
+
+   calculate dem # ls -al /etc/openvpn
+   итого 64
+   drwxr-xr-x 1 root root   144 июл 28 12:58 .
+   drwxr-xr-x 1 root root  3948 июл 30 11:51 ..
+   -rw------- 1 dem  guest 1184 июл 28 12:38 ca.crt
+   -rw-r--r-- 1 root root   160 июл 28 12:58 client.conf
+   -rw------- 1 dem  guest 4471 июл 28 12:45 client.crt
+   -rw------- 1 dem  guest 1704 июл 28 12:44 client.key
+   -rwxr-xr-x 1 root root   943 июн  6 13:07 down.sh
+   -rw-r--r-- 1 root root     0 июн  6 13:07 .keep_net-vpn_openvpn-0
+   -rwxr-xr-x 1 root root  2865 июн  6 13:07 up.sh
+   ```
+   - Подготовка на клиенте конфигурационного файла сервиса OpenVPN:
+   ```shell
+   nano /etc/openvpn/client.conf
+   ...
+   cat /etc/openvpn/client.conf
+   dev tun
+   proto udp
+   remote 192.168.56.10 1207
+   client
+   resolv-retry infinite
+   ca ./ca.crt
+   cert ./client.crt
+   key ./client.key
+   persist-key
+   persist-tun
+   comp-lzo
+   verb 3
    ```
