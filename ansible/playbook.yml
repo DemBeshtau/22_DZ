@@ -1,0 +1,56 @@
+- hosts: all
+  become: true
+  tasks:
+    
+    - name: Installing necessary software
+      apt:
+        name:
+          - openvpn
+          - iperf3
+        state: present
+        update_cache: yes
+      ignore_errors: true
+
+    - name: Checking static.key existing on server
+      stat:
+        path: /etc/openvpn/static.key
+      register: static_key_exist
+      when: ansible_hostname == "server"
+
+    - name: Generating static.key
+      command: openvpn --genkey secret /etc/openvpn/static.key
+      when: ansible_hostname == "server"
+
+    - name: Saving static.key
+      command: cat /etc/openvpn/static.key
+      register: static_key
+      when: ansible_hostname == "server"  
+
+    - name: Configuring OpenVPN on server
+      template: 
+        src: server.conf_srv.j2
+        dest: /etc/openvpn/server.conf
+        mode: 0644
+      when: ansible_hostname == "server"    
+      
+    - name: Configuring OpenVPN on client
+      template:  
+        src: server.conf_cln.j2
+        dest: /etc/openvpn/server.conf
+        mode: 0644
+      when: ansible_hostname == "client"
+
+    - name: Adding static.key on client
+      copy:
+        dest: /etc/openvpn/static.key
+        content: "{{ hostvars['server'].static_key.stdout }}"
+        mode: 0644
+      when: ansible_hostname == "client"
+
+    - name: Starting OpenVPN service
+      systemd:
+        name: openvpn@server
+        state: started
+        enabled: true
+
+    
