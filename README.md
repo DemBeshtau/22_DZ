@@ -206,3 +206,27 @@
    comp-lzo
    verb 3
    ```
+   - Подлючение к серверу OpenVPN c хостовой машины:
+   ```shell
+   calculate dem # cd /etc/openvpn/
+   calculate openvpn # openvpn --config client.conf
+   ...
+   calculate dem # ip r
+   default via 192.168.55.1 dev wlp2s0 proto dhcp src 192.168.55.251 metric 600 
+   10.10.10.0/24 via 10.10.10.5 dev tun0 
+   10.10.10.5 dev tun0 proto kernel scope link src 10.10.10.6 
+   127.0.0.0/8 via 127.0.0.1 dev lo 
+   192.168.55.0/24 dev wlp2s0 proto kernel scope link src 192.168.55.251 metric 600 
+   192.168.56.0/24 dev vboxnet0 proto kernel scope link src 192.168.56.1 
+
+   calculate dem # ping -c 4 10.10.10.1
+   PING 10.10.10.1 (10.10.10.1) 56(84) bytes of data.
+   64 bytes from 10.10.10.1: icmp_seq=1 ttl=64 time=0.389 ms
+   64 bytes from 10.10.10.1: icmp_seq=2 ttl=64 time=0.616 ms
+   64 bytes from 10.10.10.1: icmp_seq=3 ttl=64 time=0.327 ms
+   64 bytes from 10.10.10.1: icmp_seq=4 ttl=64 time=0.577 ms
+
+   --- 10.10.10.1 ping statistics ---
+   4 packets transmitted, 4 received, 0% packet loss, time 3030ms
+   rtt min/avg/max/mdev = 0.327/0.477/0.616/0.122 ms
+   ```
